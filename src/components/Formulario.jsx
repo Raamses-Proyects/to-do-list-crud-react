@@ -3,12 +3,9 @@ import Alerta from './Alerta'
 import { generarId, existeTarea, sincronizarStorage } from '../helpers/helpers'
 
 function Formulario({ // extrayendo props
-  fecha,
-  setFecha,
-  hora,
-  setHora,
-  tarea,
-  setTarea,
+  datos,
+  setDatos,
+  handleChangeDatos,
   tareasArray, 
   setTareasArray, 
   tareaSelecionadaObj,
@@ -22,9 +19,10 @@ function Formulario({ // extrayendo props
   // Cada vez que el usuario seleccione una tarea
   useEffect(() => {
     if( existeTarea(tareaSelecionadaObj) ) { // Se llenan los inputs del formulario
-      setFecha(tareaSelecionadaObj.fecha)
-      setHora(tareaSelecionadaObj.hora)
-      setTarea(tareaSelecionadaObj.tarea)
+      setDatos({ 
+        fecha: tareaSelecionadaObj.fecha, 
+        hora: tareaSelecionadaObj.hora, 
+        tarea: tareaSelecionadaObj.tarea })
     }
   }, [tareaSelecionadaObj])
 
@@ -41,25 +39,28 @@ function Formulario({ // extrayendo props
     e.preventDefault()
 
     // Validación
-    const datos = [fecha, hora, tarea]
-    if( datos.includes('') ) {
-      setError(true)
-      return
+    let arrayValidar = Object.values(datos);
+    for( let i = 0; i < arrayValidar.length; i++ ) {
+      if( arrayValidar[i].trim('') === '' ) {
+        setError(true)
+        return
+      }
     }
 
     // Quitando alerta de error
     setError(false)
 
-    // Creando objeto con los datos enlazados con lo que ingresa el usuario
-    const objTarea = { fecha, hora, tarea: tarea.trim('') }
 
     // Actualizar registro selecionado
     if( existeTarea(tareaSelecionadaObj) ) {
-      // Agregando el id del objeto/tarea seleccionado al objeto que va a estar enlazado con lo que ingrese el usuario
-      objTarea.id = tareaSelecionadaObj.id
+      
+      // Agregando el id del objeto/tarea seleccionada al objeto que va a estar enlazado con los datos ingrese el usuario
+      datos.id = tareaSelecionadaObj.id
+
+      // Creando nuevo array actualizado
       const arrayActualizado = tareasArray.map((t) => {
-        if( t.id === objTarea.id ) {
-          return objTarea
+        if( t.id === datos.id ) {
+          return datos
         }
         else {
           return t
@@ -71,8 +72,8 @@ function Formulario({ // extrayendo props
       sincronizarStorage('tareas', arrayActualizado)
     }
     else { // Insertando registro
-      objTarea.id = generarId()
-      setTareasArray([ ...tareasArray, objTarea ]) // Agregando objeto/tareas al array
+      datos.id = generarId()
+      setTareasArray([ ...tareasArray, datos ]) // Agregando objeto/tareas al array
     }
 
     // Reiniciando el formulario y el objeto de la tarea seleccionada
@@ -86,8 +87,8 @@ function Formulario({ // extrayendo props
     <form onSubmit={ handleSubmit } className='formulario__contenido'>      
       <label htmlFor="fecha" className='formulario__label'>Fecha:</label>
       <input 
-        onChange={ (e) => setFecha(e.target.value) }
-        value={fecha}
+        onChange={ (e) => handleChangeDatos(e) }
+        value={datos.fecha}
         type="date" 
         id='fecha' 
         name='fecha'
@@ -95,19 +96,19 @@ function Formulario({ // extrayendo props
 
       <label htmlFor="hora" className='formulario__label'>Hora:</label>
       <input 
-        onChange={ (e) => setHora(e.target.value) }
-        value={hora}
+        onChange={ (e) => handleChangeDatos(e) }
+        value={datos.hora}
         type="time" 
         id='hora' 
         name='hora'
         className='formulario__input' />
 
-      <label htmlFor="descripcion" className='formulario__label'>Descripción:</label>
+      <label htmlFor="tarea" className='formulario__label'>Descripción:</label>
       <textarea
-        onChange={ (e) => setTarea(e.target.value) }
-        value={tarea}
-        id="descripcion" 
-        name="descripcion"
+        onChange={ (e) => handleChangeDatos(e) }
+        value={datos.tarea}
+        id="tarea" 
+        name="tarea"
         cols="30" 
         rows="10"
         className='formulario__input'

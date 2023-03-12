@@ -6,18 +6,20 @@ import ListaTareas from './components/ListaTareas'
 function App() {
 
   // States Globales
-  const [fecha, setFecha] = useState('')
-  const [hora, setHora] = useState('')
-  const [tarea, setTarea] = useState('')
   const [tareasArray, setTareasArray] = useState( JSON.parse(localStorage.getItem('tareas')) || [])
   const [tareaSelecionadaObj, setTareaSelecionadaObj] = useState({})
 
 
+  // State y funcion para obtener datos de manera dinamica
+  const [datos, setDatos] = useState({fecha: '', hora: '', tarea: ''})
+  const handleChangeDatos = (e) => {
+    setDatos( { ...datos, [e.target.name]: e.target.value } )
+  }
+
+
   // Reiciar campos y objeto/tarea seleccionado
   const reiniciar = () => {
-    setFecha('')
-    setHora('')
-    setTarea('')
+    setDatos({fecha: '', hora: '', tarea: ''})
     setTareaSelecionadaObj({})
   }
 
@@ -30,12 +32,9 @@ function App() {
     <div className='principal contenedor'>
       <div className='principal__grid'>
         <Formulario
-          fecha={fecha}
-          setFecha={setFecha}
-          hora={hora}
-          setHora={setHora}
-          tarea={tarea}
-          setTarea={setTarea}
+          datos={datos}
+          setDatos={setDatos}
+          handleChangeDatos={handleChangeDatos}
           tareasArray={tareasArray}
           setTareasArray={setTareasArray}
           tareaSelecionadaObj={tareaSelecionadaObj}
